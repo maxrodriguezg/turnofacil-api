@@ -148,7 +148,7 @@ src/main/java/com/turnofacil/api/
 > *En este trabajo fortalecí mi comprensión de la integración continua con GitHub Actions y la importancia de automatizar pruebas para mantener un código estable. Además, desarrollé un dominio profundo de Git al liderar la recuperación técnica del repositorio tras una pérdida crítica de historiales, resolviendo desincronizaciones y conflictos de fusión complejos para unificar el proyecto. En cuanto a mi colaboración, solucioné errores clave en el código como problemas de importación y un NullPointerException en el servicio de reservas, asegurando que las ramas se integraran correctamente a través de Pull Requests y garantizando el flujo continuo del desarrollo.*
 
 ### Vicente Fabar
-> *Reflexión personal sin apoyo de IA sobre aprendizaje y contribución...*
+> *Durante este trabajo pude aprender mucho más sobre la integración continua y el uso de GitHub Actions. Entendí mejor la importancia de automatizar tareas como las pruebas y los despliegues, ya que esto permite ahorrar tiempo y evitar tener que realizar estos procesos manualmente cada vez que se hace una modificación en el proyecto. También pude mejorar mi manejo de los repositorios y, especialmente, de las ramas, que era un tema que anteriormente me costaba bastante. Además, aprendí a utilizar los Pull Request para revisar y organizar los cambios antes de incorporarlos a la rama principal, junto con los workflows para mantener un flujo de trabajo más ordenado.*
 
 ---
 
