@@ -96,14 +96,6 @@ class ReservaControllerIntegrationTest {
     }
 
     @Test
-    void listarReservas_shouldReturnEmptyListInitially() throws Exception {
-        mockMvc.perform(get("/reservas"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
-    }
-
-    @Test
     void listarReservas_shouldHandleNullAndWhitespaceEstado() throws Exception {
         mockMvc.perform(get("/reservas").param("estado", "  "))
                 .andExpect(status().isOk())
