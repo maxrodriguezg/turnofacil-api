@@ -137,4 +137,14 @@ class ReservaControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Validation Error"))
                 .andExpect(jsonPath("$.validationErrors.fechaHora").exists());
     }
+
+    @Test
+    void info_debeRetornarMetadatosApp() throws Exception {
+        mockMvc.perform(get("/health/info"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("TurnoFácil API"))
+                .andExpect(jsonPath("$.version").value("0.1.0"))
+                .andExpect(jsonPath("$.javaVersion").exists())
+                .andExpect(jsonPath("$.springBootVersion").exists());
+        }
 }
