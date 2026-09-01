@@ -36,16 +36,16 @@ public class ReservaServiceImpl implements ReservaService {
     @Transactional(readOnly = true)
     public List<ReservaResponse> listarReservas(String estado) {
         List<Reserva> reservas;
-        String estadoNormalizado = (estado != null) ? estado.trim() : null;
-        if (estadoNormalizado != null && !estadoNormalizado.isBlank()) {
-            reservas = reservaRepository.findByEstado(estadoNormalizado);
+        String estadoFiltrado = (estado != null) ? estado.trim() : null;
+        if (estadoFiltrado != null && !estadoFiltrado.isBlank()) {
+            reservas = reservaRepository.findByEstado(estadoFiltrado);
         } else {
             reservas = reservaRepository.findAll();
         }
         return reservas.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+}
 
     @Override
     @Transactional(readOnly = true)
@@ -64,4 +64,6 @@ public class ReservaServiceImpl implements ReservaService {
                 .estado(reserva.getEstado())
                 .build();
     }
+
+    
 }

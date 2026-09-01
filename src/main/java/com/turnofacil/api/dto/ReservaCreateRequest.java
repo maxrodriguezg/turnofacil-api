@@ -25,7 +25,6 @@ public class ReservaCreateRequest {
     @Size(min = 2, max = 80, message = "El servicio debe tener entre 2 y 80 caracteres")
     private String servicio;
 
-    
     @NotNull(message = "La fecha y hora son obligatorias")
     @Future(message = "La fecha y hora deben ser futuras")
     private LocalDateTime fechaHora;
