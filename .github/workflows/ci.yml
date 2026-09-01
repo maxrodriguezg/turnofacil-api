@@ -78,6 +78,7 @@ jobs:
         run: ./mvnw -B spotless:check --file pom.xml
         continue-on-error: true
 
+<<<<<<< HEAD
   docker:
     name: Build Docker Image
     runs-on: ubuntu-latest
@@ -118,6 +119,12 @@ jobs:
     name: Notify on Failure
     runs-on: ubuntu-latest
     needs: [build-and-test, code-quality, docker]
+=======
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-quality]
+>>>>>>> 4b1d8601a51e1eac3fde846ab17edc3634143bd7
     if: failure()
     steps:
       - name: Send failure notification
@@ -126,4 +133,8 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "Branch: ${{ github.ref }}"
           echo "Commit: ${{ github.sha }}"
+<<<<<<< HEAD
           echo "Workflow: ${{ github.workflow }}"
+=======
+          echo "Workflow: ${{ github.workflow }}"
+>>>>>>> 4b1d8601a51e1eac3fde846ab17edc3634143bd7
