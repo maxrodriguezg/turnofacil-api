@@ -23,7 +23,7 @@ Microservicio REST para gestión de reservas de atención — **Spring Boot 3.3 
 
 ---
 
-## 🌿 GitFlow — Estrategia de Ramificación
+## GitFlow — Estrategia de Ramificación
 
 **Justificación:** Entregas controladas, hotfixes independientes, trazabilidad completa, estándar empresarial.
 
@@ -48,7 +48,7 @@ hotfix/fix-null-pointer ──────●── (Vicente: fix NPE espacios e
 
 ---
 
-## 📝 Convenciones
+## Convenciones
 
 **Commits (Conventional Commits):**
 ```
@@ -76,7 +76,7 @@ ci: simplifica workflow para estudiante
 
 ---
 
-## 🧪 Tests (12 totales)
+## Tests (12 totales)
 
 ```bash
 ./mvnw clean test
@@ -90,7 +90,7 @@ ci: simplifica workflow para estudiante
 
 ---
 
-## 🚀 Ejecución Local
+## Ejecución Local
 
 ```bash
 git clone https://github.com/maxrodriguezg/turnofacil-api.git
@@ -105,7 +105,7 @@ cd turnofacil-api
 
 ---
 
-## 📁 Estructura MVC
+## Estructura MVC
 
 ```
 src/main/java/com/turnofacil/api/
@@ -119,7 +119,7 @@ src/main/java/com/turnofacil/api/
 
 ---
 
-## 📊 PRs Simulados (Rúbrica)
+## PRs Simulados 
 
 | PR | Autor | Rama | Tipo | Cambios |
 |----|-------|------|------|---------|
@@ -129,17 +129,17 @@ src/main/java/com/turnofacil/api/
 
 ---
 
-## 🔐 Seguridad
-- ✅ Bean Validation (`@NotNull`, `@Size`, `@Future`)
-- ✅ `@RestControllerAdvice` centralizado
-- ✅ Sin credenciales hardcodeadas
-- ✅ DTOs separados de entidades
+## Seguridad
+- Bean Validation (`@NotNull`, `@Size`, `@Future`)
+- `@RestControllerAdvice` centralizado
+- Sin credenciales hardcodeadas
+- DTOs separados de entidades
 
 ---
 
 ---
 
-## 📝 Conclusiones Individuales
+## Conclusiones Individuales
 
 ### Maximiliano Rodriguez Gamboa
 > *En este trabajo aprendí como funciona la integración continua trabajando con GitHub actions. Puede entender como y porque debemos automatizar procesos como pruebas y despliegues de una app que estemos desarrollando, es mucho mas eficiente que estar realizando estas pruebas manualmente cada vez que hacemos un cambio, aprendi que es muy importante usar bien los repositorios, y comprendi mucho mejor el manejo de ramas ya que era algo que me costaba mucho, también aprendí a utilizar los Pull Request para proponer y revisar cambios antes de integrarlos a la rama principal, los workflows también fueron importantes para mantener el proyecto mas organizado. Siento que esta experiencia me ayudo a entender mejor como se trabajo con ci/cd en proyextos reales y como puede facilitar el desarrollo y mantenimiento de una app. Con respecto a mi colaboración en el trabajo, me encargue de realizar la presentación, crear el repositorio y sus ramas, e implementar el cambio feat - agrega validación @future en fechaHora para reservas.*
@@ -152,7 +152,7 @@ src/main/java/com/turnofacil/api/
 
 ---
 
-## 🤖 Declaración IA
+## Declaración IA
 Herramientas: GitHub Copilot / Claude. Uso: documentación, pipeline, arquitectura. Todo validado con `./mvnw test`.
 
 ---

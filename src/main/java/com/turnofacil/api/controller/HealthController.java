@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.boot.SpringBootVersion;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -45,17 +44,5 @@ public class HealthController {
     @Operation(summary = "Readiness probe", description = "Kubernetes readiness probe endpoint")
     public ResponseEntity<Map<String, String>> readiness() {
         return ResponseEntity.ok(Map.of("status", "ready"));
-    }
-
-    @GetMapping("/info")
-    @Operation(summary = "Información de la aplicación", description = "Metadatos estáticos de la app")
-    public ResponseEntity<Map<String, String>> info() {
-        return ResponseEntity.ok(Map.of(
-            "name", "TurnoFácil API",
-            "version", "0.1.0",
-            "description", "Microservicio para gestión de reservas de atención",
-            "javaVersion", System.getProperty("java.version"),
-            "springBootVersion", SpringBootVersion.getVersion()
-        ));
     }
 }
