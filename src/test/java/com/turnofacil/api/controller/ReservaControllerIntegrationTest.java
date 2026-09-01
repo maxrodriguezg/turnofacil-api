@@ -125,7 +125,7 @@ class ReservaControllerIntegrationTest {
     @Test
     void crearReserva_shouldReturnBadRequestWhenFechaHoraIsPast() throws Exception {
         ReservaCreateRequest request = ReservaCreateRequest.builder()
-                .cliente("Juan Pérez")
+                .cliente("Juan Luis Pérez")
                 .servicio("Corte de cabello")
                 .fechaHora(LocalDateTime.now().minusDays(1))
                 .build();

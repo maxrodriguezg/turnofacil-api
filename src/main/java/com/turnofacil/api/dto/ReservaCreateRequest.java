@@ -26,6 +26,6 @@ public class ReservaCreateRequest {
     private String servicio;
 
     @NotNull(message = "La fecha y hora son obligatorias")
-    @Future(message = "La fecha y hora deben ser futuras")
+    @Future(message = "La fecha y hora deben ser futuras")  //
     private LocalDateTime fechaHora;
 }
