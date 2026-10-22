@@ -129,4 +129,22 @@ class ReservaControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Validation Error"))
                 .andExpect(jsonPath("$.validationErrors.fechaHora").exists());
     }
+    
+    @Test
+    void crearReserva_shouldReturnBadRequestWhenJsonIsMalformed() throws Exception {
+        mockMvc.perform(post("/reservas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ esto no es json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Cuerpo de la petición inválido o mal formado"));
+    }
+
+    @Test
+    void obtenerReserva_shouldReturnBadRequestWhenIdIsNotANumber() throws Exception {
+        mockMvc.perform(get("/reservas/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("El parámetro 'id' debe ser de tipo Long"));
+    }    
 }
