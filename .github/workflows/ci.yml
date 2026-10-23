@@ -70,7 +70,7 @@ jobs:
       - name: Nombre de la imagen en minusculas
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - name: Construir imagen
         uses: docker/build-push-action@v6
