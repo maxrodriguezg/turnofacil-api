@@ -80,7 +80,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ${{ env.IMAGE }}:${{ github.sha }}
-          args: --file=Dockerfile --severity-threshold=high
+          args: --file=Dockerfile --severity-threshold=high --policy-path=.snyk
 
       - name: Login en GitHub Container Registry
         if: github.event_name == 'push'
