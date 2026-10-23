@@ -2,10 +2,10 @@ package com.turnofacil.api.controller;
 
 import com.turnofacil.api.dto.ReservaCreateRequest;
 import com.turnofacil.api.dto.ReservaResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -128,5 +128,38 @@ class ReservaControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Validation Error"))
                 .andExpect(jsonPath("$.validationErrors.fechaHora").exists());
+    }
+
+    @Test
+    void crearReserva_shouldReturnBadRequestWhenJsonIsMalformed() throws Exception {
+        mockMvc.perform(post("/reservas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ esto no es json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Cuerpo de la petición inválido o mal formado"));
+    }
+
+    @Test
+    void obtenerReserva_shouldReturnBadRequestWhenIdIsNotANumber() throws Exception {
+        mockMvc.perform(get("/reservas/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("El parámetro 'id' debe ser de tipo Long"));
+    }
+
+    @Test
+    void crearReserva_shouldReturnUnsupportedMediaTypeWhenContentIsXml() throws Exception {
+        mockMvc.perform(post("/reservas")
+                        .contentType(MediaType.APPLICATION_XML)
+                        .content("<reserva><cliente>Test</cliente></reserva>"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.error").value("Unsupported Media Type"));
+    }
+
+    @Test
+    void rutaInexistente_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(get("/ruta-que-no-existe"))
+                .andExpect(status().isNotFound());
     }
 }
