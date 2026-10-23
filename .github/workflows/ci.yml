@@ -30,14 +30,6 @@ jobs:
       - name: Tests unitarios, integración y cobertura (JaCoCo)
         run: ./mvnw -B clean verify
 
-      - name: Validar token de SonarCloud
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          [ -n "$SONAR_TOKEN" ] || { echo "SONAR_TOKEN no esta configurado"; exit 1; }
-          curl -sf -u "$SONAR_TOKEN:" https://sonarcloud.io/api/authentication/validate \
-            | grep -q '"valid":true' || { echo "SONAR_TOKEN invalido o sin permisos"; exit 1; }
-
       - name: Analisis de calidad (SonarCloud)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
