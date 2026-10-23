@@ -30,16 +30,19 @@ jobs:
       - name: Tests unitarios, integración y cobertura (JaCoCo)
         run: ./mvnw -B clean verify
 
+      - name: Validar token de SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          [ -n "$SONAR_TOKEN" ] || { echo "SONAR_TOKEN no esta configurado"; exit 1; }
+          curl -sf -u "$SONAR_TOKEN:" https://sonarcloud.io/api/authentication/validate \
+            | grep -q '"valid":true' || { echo "SONAR_TOKEN invalido o sin permisos"; exit 1; }
+
       - name: Analisis de calidad (SonarCloud)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./mvnw -B sonar:sonar \
-            -Dsonar.projectKey="${SONAR_PROJECT_KEY:-maxrodriguezg_turnofacil-api}" \
-            -Dsonar.organization="${SONAR_ORGANIZATION:-maxrodriguezg}"
+        run: ./mvnw -B sonar:sonar
 
       - name: Guardar reporte de cobertura
         if: always()
