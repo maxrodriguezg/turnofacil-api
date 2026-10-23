@@ -1,0 +1,7 @@
+version: v1.25.0
+ignore:
+  SNYK-JAVA-ORGGLASSFISHJAXB-20883142:
+    - '*':
+        reason: >-
+            El servicio Turno Fácil tiene una falla al procesar las reservas. Llega como una dependencia interna de "framework-x" y nuestro código nunca lo invoca ni expone sus funciones de reserva a los usuarios. No existe una versión corregida. Se revisará al vencer esta excepción o cuando la herramienta lance un parche.
+        expires: 2026-12-31T00:00:00.000Z

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import java.util.Set;
 
@@ -70,5 +71,14 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().getMessage())
                 .isEqualTo("Ha ocurrido un error interno en el servidor");
         assertThat(response.getBody().getMessage()).doesNotContain("secreto");
+    }
+
+    @Test
+    void handleMethodNotSupported_debeRetornar405() {
+        ResponseEntity<ErrorResponse> response = handler.handleMethodNotSupported(
+                new HttpRequestMethodNotSupportedException("DELETE"), request);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getStatus()).isEqualTo(405);
     }
 }
