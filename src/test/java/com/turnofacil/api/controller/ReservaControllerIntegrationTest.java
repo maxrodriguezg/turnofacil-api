@@ -146,5 +146,20 @@ class ReservaControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Bad Request"))
                 .andExpect(jsonPath("$.message").value("El parámetro 'id' debe ser de tipo Long"));
-    }    
+    }
+
+    @Test
+    void crearReserva_shouldReturnUnsupportedMediaTypeWhenContentIsXml() throws Exception {
+        mockMvc.perform(post("/reservas")
+                        .contentType(MediaType.APPLICATION_XML)
+                        .content("<reserva><cliente>Test</cliente></reserva>"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.error").value("Unsupported Media Type"));
+    }
+
+    @Test
+    void rutaInexistente_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(get("/ruta-que-no-existe"))
+                .andExpect(status().isNotFound());
+    }
 }
