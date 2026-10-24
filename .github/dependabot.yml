@@ -49,10 +49,8 @@ updates:
     commit-message:
       prefix: "chore(docker)"
     ignore:
-      - dependency-name: "eclipse-temurin"
-        update-types: ["version-update:semver-major"]
       - dependency-name: "maven"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: "eclipse-temurin"
 
   - package-ecosystem: "docker-compose"
     directory: "/"
