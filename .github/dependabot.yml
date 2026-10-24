@@ -12,7 +12,6 @@ updates:
     labels: ["dependencies", "java"]
     commit-message:
       prefix: "chore(deps)"
-    versioning-strategy: "increase"
     groups:
       maven-minor-patch:
         patterns: ["*"]
