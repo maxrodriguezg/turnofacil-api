@@ -180,13 +180,50 @@ jobs:
       (github.ref == 'refs/heads/main' ||
        github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: ci-notify-${{ github.ref_name }}
+      cancel-in-progress: false
+
     permissions:
       issues: write
+
     steps:
-      - name: Crear issue de alerta
+      - name: Crear o actualizar alerta
         env:
           GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
         run: |
-          gh issue create -R "${{ github.repository }}" \
-            --title "Pipeline fallo en ${{ github.ref_name }} (${{ github.sha }})" \
-            --body "Ejecucion: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          set -euo pipefail
+
+          TITLE="CI/CD: fallo en ${BRANCH}"
+
+          MESSAGE=$(printf 'Falló el pipeline de `%s`.\n\nCommit: `%s`\nEjecución: %s\n' \
+            "$BRANCH" "$COMMIT_SHA" "$RUN_URL")
+
+          EXISTING_ISSUE=$(gh issue list \
+            --repo "$REPOSITORY" \
+            --state open \
+            --limit 1000 \
+            --json number,title |
+            jq -r --arg title "$TITLE" \
+              '[.[] | select(.title == $title) | .number] | .[0] // empty')
+
+          if [[ -n "$EXISTING_ISSUE" ]]; then
+            echo "Actualizando Issue #${EXISTING_ISSUE}"
+
+            gh issue comment "$EXISTING_ISSUE" \
+              --repo "$REPOSITORY" \
+              --body "$MESSAGE"
+          else
+            echo "Creando nueva alerta para ${BRANCH}"
+
+            gh issue create \
+              --repo "$REPOSITORY" \
+              --title "$TITLE" \
+              --body "$MESSAGE"
+          fi
