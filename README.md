@@ -423,7 +423,9 @@ Las credenciales no se versionan: `.env` está en `.gitignore` y los valores rea
 
 ### Benjamín Dattoli Peña
 
-> *En este trabajo fortalecí mi comprensión de la integración continua con GitHub Actions y la importancia de automatizar pruebas para mantener un código estable. Además, desarrollé un dominio profundo de Git al liderar la recuperación técnica del repositorio tras una pérdida crítica de historiales, resolviendo desincronizaciones y conflictos de fusión complejos para unificar el proyecto. En cuanto a mi colaboración, solucioné errores clave en el código como problemas de importación y un NullPointerException en el servicio de reservas, asegurando que las ramas se integraran correctamente a través de Pull Requests y garantizando el flujo continuo del desarrollo.*
+> *Durante el desarrollo de este proyecto, pudimos comprender mejor la importancia de implementar prácticas DevOps para garantizar la calidad, seguridad y funcionamiento de una aplicación. La integración de herramientas como GitHub Actions, JaCoCo, SonarCloud, Snyk y Dependabot nos permitió automatizar pruebas, analizar el código e identificar posibles vulnerabilidades en las dependencias utilizadas.
+Uno de los principales desafíos fue solucionar los errores que aparecieron durante las ejecuciones del pipeline, especialmente aquellos relacionados con las herramientas de seguridad y las notificaciones automáticas. Esto nos permitió aprender a interpretar los registros de ejecución, identificar las causas de los problemas y realizar mejoras sin afectar el funcionamiento general de la API.
+Finalmente, este trabajo nos permitió reforzar la importancia del trabajo colaborativo, el control de versiones y la integración continua. Comprendimos que DevOps no consiste únicamente en automatizar procesos, sino también en mantener un sistema confiable, detectar errores oportunamente y aplicar mejoras constantes durante el desarrollo del software.*
 
 ### Vicente Fabar
 
@@ -431,7 +433,7 @@ Las credenciales no se versionan: `.env` está en `.gitignore` y los valores rea
 
 ## Declaración IA
 
-Herramientas: GitHub Copilot, Claude y opencode. Uso: configuración del pipeline, contenedores y análisis de calidad. Todo el contenido fue revisado y validado con `./mvnw clean verify` y con las ejecuciones de GitHub Actions.
+Herramientas: GitHub Copilot, Claude, ChatGPT (GPT-6, High) y opencode. Uso: configuración del pipeline, contenedores y análisis de calidad. Todo el contenido fue revisado y validado con `./mvnw clean verify` y con las ejecuciones de GitHub Actions.
 
 ---
 
