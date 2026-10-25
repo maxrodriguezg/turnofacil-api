@@ -423,9 +423,9 @@ Las credenciales no se versionan: `.env` está en `.gitignore` y los valores rea
 
 ### Benjamín Dattoli Peña
 
-> *Durante el desarrollo de este proyecto, pudimos comprender mejor la importancia de implementar prácticas DevOps para garantizar la calidad, seguridad y funcionamiento de una aplicación. La integración de herramientas como GitHub Actions, JaCoCo, SonarCloud, Snyk y Dependabot nos permitió automatizar pruebas, analizar el código e identificar posibles vulnerabilidades en las dependencias utilizadas.
-Uno de los principales desafíos fue solucionar los errores que aparecieron durante las ejecuciones del pipeline, especialmente aquellos relacionados con las herramientas de seguridad y las notificaciones automáticas. Esto nos permitió aprender a interpretar los registros de ejecución, identificar las causas de los problemas y realizar mejoras sin afectar el funcionamiento general de la API.
-Finalmente, este trabajo nos permitió reforzar la importancia del trabajo colaborativo, el control de versiones y la integración continua. Comprendimos que DevOps no consiste únicamente en automatizar procesos, sino también en mantener un sistema confiable, detectar errores oportunamente y aplicar mejoras constantes durante el desarrollo del software.*
+> *Durante el desarrollo de este proyecto, pude comprender mejor la importancia de implementar prácticas DevOps para garantizar la calidad, seguridad y funcionamiento de una aplicación. La integración de herramientas como GitHub Actions, JaCoCo, SonarCloud, Snyk y Dependabot nos permitió automatizar pruebas, analizar el código e identificar posibles vulnerabilidades en las dependencias utilizadas.
+Uno de los principales desafíos fue solucionar los errores que aparecieron durante las ejecuciones del pipeline, especialmente aquellos relacionados con las herramientas de seguridad y las notificaciones automáticas. Esto me permitió aprender a interpretar los registros de ejecución, identificar las causas de los problemas y realizar mejoras sin afectar el funcionamiento general de la API.
+Finalmente, este trabajo me permitió reforzar la importancia del trabajo colaborativo, el control de versiones y la integración continua. Comprendí que DevOps no consiste únicamente en automatizar procesos, sino también en mantener un sistema confiable, detectar errores oportunamente y aplicar mejoras constantes durante el desarrollo del software.*
 
 ### Vicente Fabar
 
