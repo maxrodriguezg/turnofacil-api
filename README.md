@@ -429,7 +429,11 @@ Finalmente, este trabajo me permitió reforzar la importancia del trabajo colabo
 
 ### Vicente Fabar
 
+### EA1
 > *Durante este trabajo pude aprender mucho más sobre la integración continua y el uso de GitHub Actions. Entendí mejor la importancia de automatizar tareas como las pruebas y los despliegues, ya que esto permite ahorrar tiempo y evitar tener que realizar estos procesos manualmente cada vez que se hace una modificación en el proyecto. También pude mejorar mi manejo de los repositorios y, especialmente, de las ramas, que era un tema que anteriormente me costaba bastante. Además, aprendí a utilizar los Pull Request para revisar y organizar los cambios antes de incorporarlos a la rama principal, junto con los workflows para mantener un flujo de trabajo más ordenado.*
+
+### EA2
+> *en la segunda estapa de este trabajo logre mejorar mis habilidades en devops, debido a que pese ha ya saber de CI/CD en github action, esto hizo que se me aclara varias dudas que tuve, ademas de aprender a desarrollar entre mas personas para la disminucion de errores y crear features para evitar choques entre los trabajos de mis compañeros, las pull request me sirvio para ver que errores podriamos encontrar y evitar para no perjudicar a main (produccion) lo que me facilito bastante el trabajo.*
 
 ## Declaración IA
 
