@@ -1,0 +1,49 @@
+.app {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.app__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--tinta);
+}
+
+.app__titulo {
+  margin: 0;
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+.estado-api {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--tinta-suave);
+}
+
+.estado-api__punto {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--aviso);
+}
+
+.estado-api--conectada .estado-api__punto {
+  background: var(--ok);
+}
+
+.estado-api--sin-conexion .estado-api__punto {
+  background: var(--error);
+}
+
+.app__contenido {
+  padding-top: 1.5rem;
+  color: var(--tinta-suave);
+}

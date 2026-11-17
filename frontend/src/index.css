@@ -1,0 +1,28 @@
+:root {
+  --tinta: #12332f;
+  --tinta-suave: #4b6662;
+  --papel: #f5f7f6;
+  --superficie: #ffffff;
+  --linea: #d5dedb;
+  --ok: #1f7a4d;
+  --error: #b42318;
+  --aviso: #8a6100;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--tinta);
+  background: var(--papel);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 2px;
+}
