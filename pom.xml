@@ -25,8 +25,9 @@
         <maven.compiler.target>21</maven.compiler.target>
         <lombok.version>1.18.42</lombok.version>
         <postgresql.version>42.7.14</postgresql.version>
-        <jackson-bom.version>3.1.7</jackson-bom.version>
-        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
+        <!-- Actualiza estas dos líneas a las versiones seguras -->
+        <jackson-bom.version>3.1.8</jackson-bom.version>
+        <jackson-2-bom.version>2.21.8</jackson-2-bom.version>
 
         <!-- SonarCloud -->
         <sonar.projectKey>maxrodriguezg_turnofacil-api</sonar.projectKey>
