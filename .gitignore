@@ -48,3 +48,6 @@ spring-boot-devtools.properties
 # H2 Database
 *.mv.db
 *.trace.db
+
+ecs/out/
+lab.env
