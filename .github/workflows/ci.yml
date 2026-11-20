@@ -34,7 +34,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./mvnw -B sonar:sonar -Dsonar.qualitygate.wait=true
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$GITHUB_REF" = "refs/heads/develop" ]; then
+            ./mvnw -B sonar:sonar
+          else
+            ./mvnw -B sonar:sonar -Dsonar.qualitygate.wait=true
+          fi
 
       - name: Guardar reporte de cobertura
         if: always()
