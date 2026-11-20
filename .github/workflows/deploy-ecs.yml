@@ -1,0 +1,154 @@
+name: Deploy API - ECS Fargate
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag de imagen (vacio = SHA del commit)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "pom.xml"
+      - "Dockerfile"
+      - "ecs/**"
+      - ".github/workflows/deploy-ecs.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-api-ecs
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER || 'turnofacil-ecs' }}
+  ECS_SERVICE: turnofacil-api
+  ECR_REPOSITORY: turnofacil-api
+  LOG_GROUP: ${{ vars.LOG_GROUP || '/ecs/turnofacil' }}
+  NAMESPACE: ${{ vars.NAMESPACE || 'turnofacil.local' }}
+  SUBNET1: ${{ vars.SUBNET1 }}
+  SUBNET2: ${{ vars.SUBNET2 }}
+  SG_API: ${{ vars.SG_API }}
+  LAB_ROLE_ARN: ${{ vars.LAB_ROLE_ARN }}
+  DB_HOST: db
+  DB_NAME: ${{ vars.DB_NAME || 'turnofacil' }}
+  DB_USER: ${{ vars.DB_USER || 'turno' }}
+  API_DESIRED_COUNT: "2"
+
+jobs:
+  deploy:
+    name: Build, push y deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Calcular registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "REGISTRY=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> "$GITHUB_ENV"
+
+      - name: Resolver red y rol (si no hay variables)
+        run: |
+          VPC_ID=""
+          if [ -z "${SUBNET1:-}" ] || [ -z "${SUBNET2:-}" ]; then
+            VPC_ID=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query "Vpcs[0].VpcId" --output text)
+            SUBNET1=$(aws ec2 describe-subnets --filters Name=vpc-id,Values="$VPC_ID" --query "Subnets[0].SubnetId" --output text)
+            SUBNET2=$(aws ec2 describe-subnets --filters Name=vpc-id,Values="$VPC_ID" --query "Subnets[1].SubnetId" --output text)
+            if [ -z "$SUBNET1" ] || [ "$SUBNET1" = "None" ] || [ -z "$SUBNET2" ] || [ "$SUBNET2" = "None" ]; then
+              echo "No se encontraron subredes en la VPC por defecto. Ejecuta Bootstrap ECS primero."
+              exit 1
+            fi
+            echo "SUBNET1=$SUBNET1" >> "$GITHUB_ENV"
+            echo "SUBNET2=$SUBNET2" >> "$GITHUB_ENV"
+          fi
+          if [ -z "${SG_API:-}" ]; then
+            if [ -z "$VPC_ID" ]; then
+              VPC_ID=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query "Vpcs[0].VpcId" --output text)
+            fi
+            SG_API=$(aws ec2 describe-security-groups --filters Name=group-name,Values=turnofacil-api-sg Name=vpc-id,Values="$VPC_ID" --query "SecurityGroups[0].GroupId" --output text)
+            if [ -z "$SG_API" ] || [ "$SG_API" = "None" ]; then
+              echo "No se encontro turnofacil-api-sg. Ejecuta Bootstrap ECS primero."
+              exit 1
+            fi
+            echo "SG_API=$SG_API" >> "$GITHUB_ENV"
+          fi
+          if [ -z "${LAB_ROLE_ARN:-}" ]; then
+            ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+            echo "LAB_ROLE_ARN=arn:aws:iam::${ACCOUNT_ID}:role/LabRole" >> "$GITHUB_ENV"
+          fi
+
+      - name: Login ECR y asegurar repositorio
+        run: |
+          if ! aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1; then
+            aws ecr create-repository --repository-name "$ECR_REPOSITORY" >/dev/null
+          fi
+          aws ecr get-login-password --region "$AWS_REGION" | \
+            docker login --username AWS --password-stdin "$REGISTRY"
+
+      - name: Build y push de la imagen
+        run: |
+          TAG="${{ github.event.inputs.image_tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_SHA::12}"
+          fi
+          IMAGE_URI="$REGISTRY/$ECR_REPOSITORY:$TAG"
+          echo "IMAGE_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "API_IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
+          docker build -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+
+      - name: Renderizar task definition y servicio
+        env:
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: bash ecs/render.sh td-api svc-api
+
+      - name: Registrar task definition
+        run: |
+          TD_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://ecs/out/td-api.json \
+            --query "taskDefinition.taskDefinitionArn" --output text)
+          echo "TD_ARN=$TD_ARN" >> "$GITHUB_ENV"
+          echo "Task definition: $TD_ARN"
+
+      - name: Crear o actualizar el servicio
+        run: |
+          STATUS=$(aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" \
+            --query "services[0].status" --output text 2>/dev/null || true)
+          if [ "$STATUS" = "ACTIVE" ]; then
+            aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" \
+              --task-definition "$TD_ARN" >/dev/null
+          else
+            aws ecs create-service --cli-input-json file://ecs/out/svc-api.json >/dev/null
+          fi
+
+      - name: Esperar estabilidad y medir duracion
+        run: |
+          START=$(date +%s)
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+          END=$(date +%s)
+          echo "DEPLOY_SECONDS=$((END-START))" >> "$GITHUB_ENV"
+
+      - name: Resumen
+        run: |
+          {
+            echo "### Deploy API"
+            echo ""
+            echo "- Imagen: \`$API_IMAGE_URI\`"
+            echo "- Task definition: \`$TD_ARN\`"
+            echo "- Servicio: \`$ECS_SERVICE\`"
+            echo "- Duracion del deploy: \`$DEPLOY_SECONDS\` s"
+          } >> "$GITHUB_STEP_SUMMARY"

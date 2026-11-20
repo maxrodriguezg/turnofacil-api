@@ -1,0 +1,83 @@
+{
+  "family": "turnofacil-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${LAB_ROLE_ARN}",
+  "taskRoleArn": "${LAB_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "${API_IMAGE_URI}",
+      "essential": true,
+      "portMappings": [
+        {
+          "name": "api-port",
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "environment": [
+        { "name": "SPRING_PROFILES_ACTIVE", "value": "prod" },
+        { "name": "SPRING_DATASOURCE_URL", "value": "jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}" },
+        { "name": "SPRING_DATASOURCE_USERNAME", "value": "${DB_USER}" },
+        { "name": "SPRING_DATASOURCE_PASSWORD", "value": "${DB_PASSWORD}" },
+        { "name": "JAVA_TOOL_OPTIONS", "value": "-javaagent:/opt/aws-opentelemetry-agent.jar" },
+        { "name": "OTEL_SERVICE_NAME", "value": "turnofacil-api" },
+        { "name": "OTEL_EXPORTER_OTLP_ENDPOINT", "value": "http://localhost:4317" },
+        { "name": "OTEL_EXPORTER_OTLP_PROTOCOL", "value": "grpc" },
+        { "name": "OTEL_TRACES_EXPORTER", "value": "otlp" },
+        { "name": "OTEL_METRICS_EXPORTER", "value": "none" },
+        { "name": "OTEL_LOGS_EXPORTER", "value": "none" },
+        { "name": "OTEL_TRACES_SAMPLER", "value": "always_on" },
+        { "name": "OTEL_RESOURCE_ATTRIBUTES", "value": "service.name=turnofacil-api,deployment.environment=lab" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "api"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget -qO- http://localhost:8080/health/liveness || exit 1"],
+        "interval": 15,
+        "timeout": 5,
+        "retries": 5,
+        "startPeriod": 90
+      }
+    },
+    {
+      "name": "otel-collector",
+      "image": "public.ecr.aws/aws-observability/aws-otel-collector:latest",
+      "essential": false,
+      "portMappings": [
+        {
+          "name": "otlp-grpc",
+          "containerPort": 4317,
+          "hostPort": 4317,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "AWS_REGION", "value": "${AWS_REGION}" },
+        {
+          "name": "AOT_CONFIG_CONTENT",
+          "value": "receivers:\n  otlp:\n    protocols:\n      grpc:\n        endpoint: 0.0.0.0:4317\nprocessors:\n  batch:\nexporters:\n  awsxray:\n    region: ${AWS_REGION}\nservice:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      processors: [batch]\n      exporters: [awsxray]\n"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "otel"
+        }
+      }
+    }
+  ]
+}
