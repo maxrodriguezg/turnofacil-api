@@ -1,0 +1,43 @@
+{
+  "family": "turnofacil-db",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${LAB_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "db",
+      "image": "postgres:16-alpine",
+      "essential": true,
+      "portMappings": [
+        {
+          "name": "db-port",
+          "containerPort": 5432,
+          "hostPort": 5432,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "POSTGRES_DB", "value": "${DB_NAME}" },
+        { "name": "POSTGRES_USER", "value": "${DB_USER}" },
+        { "name": "POSTGRES_PASSWORD", "value": "${DB_PASSWORD}" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "db"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 5,
+        "startPeriod": 30
+      }
+    }
+  ]
+}
