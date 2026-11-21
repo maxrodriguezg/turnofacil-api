@@ -142,8 +142,8 @@ jobs:
 
       - name: Levantar la aplicacion
         run: |
-          docker compose pull
-          docker compose up -d --no-build
+          docker compose pull db api
+          docker compose up -d --no-build db api
 
       - name: Esperar a que la API responda
         run: |
