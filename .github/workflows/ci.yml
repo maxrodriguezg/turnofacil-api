@@ -30,6 +30,38 @@ jobs:
       - name: Tests unitarios, integración y cobertura (JaCoCo)
         run: ./mvnw -B clean verify
 
+      - name: Configurar credenciales AWS (solo push)
+        if: github.event_name == 'push'
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Publicar cobertura en CloudWatch
+        if: github.event_name == 'push'
+        run: |
+          COVERAGE=$(python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('target/site/jacoco/jacoco.xml').getroot()
+          for c in root.findall('counter'):
+              if c.get('type') == 'LINE':
+                  missed = int(c.get('missed'))
+                  covered = int(c.get('covered'))
+                  print(f"{covered * 100.0 / (missed + covered):.2f}")
+                  break
+          PY
+          )
+          echo "Cobertura API: $COVERAGE%"
+          aws cloudwatch put-metric-data \
+            --namespace TurnoFacil/CI \
+            --metric-name CoveragePercent \
+            --value "$COVERAGE" \
+            --unit Percent \
+            --dimensions Service=turnofacil-api \
+            --region us-east-1
+
       - name: Analisis de calidad (SonarCloud)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

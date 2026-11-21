@@ -142,6 +142,16 @@ jobs:
           END=$(date +%s)
           echo "DEPLOY_SECONDS=$((END-START))" >> "$GITHUB_ENV"
 
+      - name: Publicar tiempo de despliegue en CloudWatch
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace TurnoFacil/CI \
+            --metric-name DeploymentDurationSeconds \
+            --value "$DEPLOY_SECONDS" \
+            --unit Seconds \
+            --dimensions Service=turnofacil-api \
+            --region "$AWS_REGION"
+
       - name: Resumen
         run: |
           {
