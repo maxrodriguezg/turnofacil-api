@@ -4,7 +4,222 @@
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=maxrodriguezg_turnofacil-api&metric=alert_status)](https://sonarcloud.io/project/overview?id=maxrodriguezg_turnofacil-api)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=maxrodriguezg_turnofacil-api&metric=coverage)](https://sonarcloud.io/project/overview?id=maxrodriguezg_turnofacil-api)
 
-Microservicio REST para la gestión de reservas de atención, construido con Java 21 y Spring Boot 4.0.8. Incluye un pipeline CI/CD en GitHub Actions con pruebas automatizadas, cobertura, análisis estático, escaneo de dependencias, construcción de imagen Docker y despliegue automático con Docker Compose.
+Microservicio REST para la gestión de reservas de atención, construido con Java 21 y Spring Boot 4.0.9. Forma parte de TurnoFácil junto con la web React y se despliega en AWS ECS Fargate con Service Connect, observabilidad en CloudWatch y pipeline CI/CD en GitHub Actions.
+
+---
+
+## EP3 — Observabilidad y despliegue en AWS ECS
+
+> Esta sección describe el estado actual de la EP3. Las secciones posteriores sobre Docker Compose corresponden al entorno local y a etapas anteriores.
+
+TurnoFácil está compuesto por:
+
+- **API REST** en Spring Boot 4.0.9.
+- **Web** en React + Nginx.
+- **PostgreSQL 16**.
+- Despliegue en **AWS ECS Fargate** con **Service Connect**.
+- Observabilidad con **CloudWatch**, **SNS** y trazas con **ADOT/OpenTelemetry**.
+
+Repositorios:
+
+- API: https://github.com/maxrodriguezg/turnofacil-api
+- Web: https://github.com/vf-organization/turnofacil-web
+
+### Arquitectura
+
+```text
+Internet
+   │ 8080
+   ▼
+[Web ECS] ──proxy /api──► [API ECS ×2] ──► [PostgreSQL ECS]
+   │                         │
+   └──── Service Connect ─────┘
+                             │
+                  CloudWatch Metrics + Logs
+                             │
+                  Dashboard + Alarma 5XX
+                             │
+                            SNS → correo
+```
+
+- Solo la **web** es pública.
+- La API y la base de datos solo aceptan tráfico interno.
+- La API tiene **2 réplicas**.
+- La web resuelve la API por `turnofacil-api:8080`.
+- La API resuelve la base por `db:5432`.
+
+### Stack de la EP3
+
+| Componente | Tecnología |
+|---|---|
+| Lenguaje API | Java 21 |
+| Framework API | Spring Boot 4.0.9 |
+| Persistencia | Spring Data JPA + PostgreSQL 16 |
+| Frontend | React 19 + Vite 8 + Nginx |
+| Orquestación | ECS Fargate + Service Connect |
+| Registro de imágenes | Amazon ECR |
+| Métricas y logs | CloudWatch + Container Insights |
+| Alertas | CloudWatch Alarms + SNS |
+| Trazas | ADOT/OpenTelemetry → X-Ray |
+| CI/CD | GitHub Actions |
+| Calidad | SonarCloud, JaCoCo, Snyk |
+| Contenedores | Docker multi-stage |
+
+### Despliegue en ECS
+
+| Workflow | Función |
+|---|---|
+| `Bootstrap ECS` | Crea clúster, namespace, logs, red, SGs, ECR y PostgreSQL |
+| `Deploy API - ECS Fargate` | Build → ECR → task definition → servicio API |
+| `Deploy Web - ECS Fargate` | Build → ECR → task definition → servicio web |
+
+Orden obligatorio:
+
+1. **Bootstrap ECS**
+2. **Deploy API**
+3. **Deploy Web**
+
+Características:
+
+- Las imágenes se publican en ECR.
+- La API usa `appProtocol: http` para las métricas de Service Connect.
+- La web se despliega después porque Nginx resuelve `turnofacil-api` al arrancar.
+- El deploy de `main` se ejecuta al hacer merge.
+- La IP pública de la web cambia cuando ECS reemplaza la tarea.
+
+Secrets necesarios:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
+- `POSTGRES_PASSWORD` (solo API)
+
+> Las credenciales de AWS Academy caducan al terminar la sesión. Hay que actualizarlas antes de cada despliegue.
+
+### Observabilidad
+
+Dashboard:
+
+- **Nombre:** `Dashboard-Mesh-turnofacil`
+- **URL:** https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=Dashboard-Mesh-turnofacil
+
+Widgets:
+
+1. CPU por servicio.
+2. Memoria por servicio.
+3. Requests y latencia del mesh.
+4. Códigos HTTP 2XX/5XX.
+5. Logs de errores y warnings.
+6. Tiempo de despliegue.
+7. Cobertura de pruebas.
+
+Métricas custom en `TurnoFacil/CI`:
+
+| Métrica | Servicio | Valor registrado |
+|---|---|---:|
+| `CoveragePercent` | API | 97.4% |
+| `CoveragePercent` | Web | 97.53% |
+| `DeploymentDurationSeconds` | API | 382 s |
+| `DeploymentDurationSeconds` | Web | 243 s |
+
+Alarma:
+
+- **Nombre:** `Mesh-5XX-turnofacil`
+- Métrica: `HTTPCode_Target_5XX_Count`
+- Dimensión: `TargetDiscoveryName=turnofacil-api`
+- Umbral: 5 errores en 60 s
+- Acción: SNS `turnofacil-mesh-alertas` → correo
+
+Historial verificado:
+
+```text
+INSUFFICIENT_DATA → OK → ALARM → OK
+```
+
+Prueba de fallo realizada:
+
+1. Se bajó PostgreSQL a 0.
+2. Se generaron peticiones.
+3. La API devolvió 5XX.
+4. La alarma pasó a `ALARM` y envió correo.
+5. Se restauró PostgreSQL.
+6. Se forzó redeploy de la API.
+7. La app volvió a `200/201`.
+8. La alarma volvió a `OK`.
+
+### Calidad y seguridad
+
+- **SonarCloud:** Quality Gate bloqueante en API y web.
+- **Snyk:** vulnerabilidades altas bloquean el pipeline.
+- **JaCoCo:** mínimo 60% de cobertura en API.
+- **Branch protection:** `main` y `develop` con PR obligatorio, checks requeridos, sin force-push y sin borrado.
+- **Acciones de GitHub:** fijadas a SHA completo.
+- **Web:** `npm ci --ignore-scripts`.
+- **Red:** API y PostgreSQL no son accesibles desde internet; solo la web expone 8080.
+
+### Trazabilidad con X-Ray
+
+La API incluye:
+
+- agente ADOT;
+- sidecar `otel-collector`;
+- exportador `awsxray`.
+
+Estado actual: **configurado, pero bloqueado por permisos de AWS Academy**.
+
+```text
+AccessDeniedException:
+LabRole is not authorized to perform: xray:PutTraceSegments
+```
+
+Solución requerida por un administrador:
+
+```text
+Adjuntar AWSXRayDaemonWriteAccess a LabRole
+```
+
+No requiere cambios de código.
+
+### Mapeo con la rúbrica
+
+| IE | Evidencia |
+|---|---|
+| IE1 | Dashboard, logs, métricas, alarma 5XX y correo |
+| IE2 | ECS Fargate + Service Connect + deploy automático + ADOT configurado |
+| IE3 | Cobertura y tiempo de despliegue en el dashboard |
+| IE4 | Este README, slides y video |
+| IE5 | SonarCloud, Snyk y branch protection |
+| IE6 | PR #77 rojo y bloqueado por checks |
+
+### Evidencias
+
+- PR de fallo controlado: https://github.com/maxrodriguezg/turnofacil-api/pull/77
+- Bootstrap: https://github.com/maxrodriguezg/turnofacil-api/actions/runs/44837804523
+- Deploy API: https://github.com/maxrodriguezg/turnofacil-api/actions/runs/44953972742
+- Deploy Web: https://github.com/vf-organization/turnofacil-web/actions/runs/44953978194
+- CI API en main: https://github.com/maxrodriguezg/turnofacil-api/actions/runs/44953972796
+- CI Web en main: https://github.com/vf-organization/turnofacil-web/actions/runs/44955054897
+
+### Limitaciones
+
+- AWS Academy no permite modificar IAM: X-Ray queda bloqueado hasta que un administrador adjunte la política.
+- Las credenciales de Academy expiran.
+- PostgreSQL en Fargate usa almacenamiento efímero: al reemplazar la tarea se pierden los datos y la API debe redeployarse para crear las tablas.
+- La IP pública de la web cambia al reemplazar la tarea.
+
+### Guion sugerido para el video
+
+1. Abrir la web y mostrar reservas.
+2. Crear una reserva y mostrar `201`.
+3. Mostrar los servicios ECS: API 2/2, web 1/1, BD 1/1.
+4. Abrir el dashboard y mostrar las cuatro familias de métricas.
+5. Mostrar `CoveragePercent` y `DeploymentDurationSeconds`.
+6. Mostrar la alarma y el correo de alerta/recuperación.
+7. Mostrar el PR #77 rojo y bloqueado.
+8. Mostrar branch protection y SonarCloud.
+9. Mencionar la limitación de X-Ray por IAM.
+
+---
 
 ## Integrantes
 
@@ -23,7 +238,7 @@ El proyecto aplica una estrategia GitFlow con ramas `main`, `develop`, `feature/
 | Componente | Tecnología |
 |---|---|
 | Lenguaje | Java 21 |
-| Framework | Spring Boot 4.0.8 |
+| Framework | Spring Boot 4.0.9 |
 | Persistencia | Spring Data JPA |
 | Base de datos | H2 en memoria (desarrollo) / PostgreSQL 16 (producción) |
 | Validación | Jakarta Bean Validation |
@@ -35,8 +250,10 @@ El proyecto aplica una estrategia GitFlow con ramas `main`, `develop`, `feature/
 | Cobertura | JaCoCo 0.8.12 |
 | Calidad | SonarCloud |
 | Seguridad de dependencias | Snyk + Dependabot |
-| Contenedores | Docker + Docker Compose |
-| CI/CD | GitHub Actions + GHCR |
+| Contenedores | Docker + ECS Fargate (local: Docker Compose) |
+| Orquestación | ECS Fargate + Service Connect |
+| Observabilidad | CloudWatch + SNS + ADOT |
+| CI/CD | GitHub Actions + ECR + GHCR |
 
 ## Arquitectura
 
@@ -170,7 +387,9 @@ docker compose down -v
 | Swagger UI | `http://localhost:8080/swagger-ui.html` |
 | H2 Console (solo dev) | `http://localhost:8080/h2-console` |
 
-## Docker y orquestación
+## Docker y orquestación (entorno local / legado)
+
+> **EP3:** el despliegue real es ECS Fargate con Service Connect. Esta sección describe el uso local con Docker Compose.
 
 ### Dockerfile
 
@@ -201,6 +420,8 @@ Características de la orquestación:
 ## Pipeline CI/CD
 
 Archivo: `.github/workflows/ci.yml`.
+
+> **EP3:** además de este pipeline, existen `bootstrap-ecs.yml` y `deploy-ecs.yml` para el despliegue en ECS. Ver la sección EP3 al inicio.
 
 ### Disparadores
 
@@ -420,6 +641,9 @@ Las credenciales no se versionan: `.env` está en `.gitignore` y los valores rea
 
 ### EA2
 > *Durante este trabajo aprendí a integrar SonarCloud, JaCoCo, Snyk y Dependabot en un pipeline CI/CD, comprendiendo la importancia de la calidad, seguridad y trazabilidad del código. Mi contribución fue configurar SonarCloud, resolver conflictos con develop y corregir problemas en los PRs de Dependabot. Las dificultades mas grandes que tuve fueron los errores de autorizacion, la falta de secrets y las incompatibilidades al actualizar el JDK. Si volviera a realizar el trabajo, configuraria las herramientas y los secrets desde el inicio. Esta experiencia me ayudo a comprender como mantener un pipeline más seguro, automatizado y confiable.*
+
+### EP3
+> *En esta evaluación aprendí que DevOps no consiste solamente en automatizar despliegues, sino también en monitorear y asegurar el funcionamiento de una aplicación, sobre todo al trabajar con servicios como ECS Fargate y CloudWatch. Mi aporte principal fue participar en la configuración y revisión del monitoreo, incluyendo el dashboard y las alarmas para detectar errores. La dificultad más grande fue lograr que todos los servicios y herramientas funcionaran correctamente, especialmente por los problemas de permisos y las credenciales de AWS Academy, y la resolví revisando las configuraciones y trabajando en equipo para encontrar soluciones. Si volviera a hacerlo, organizaría mejor los despliegues y documentaría cada etapa del proceso, porque eso facilitaría identificar errores y evitaría perder tiempo durante la implementación.*
 
 ### Benjamín Dattoli Peña
 
