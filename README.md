@@ -653,11 +653,15 @@ Finalmente, este trabajo me permitió reforzar la importancia del trabajo colabo
 
 ### Vicente Fabar
 
-### EA1
+### EP1
 > *Durante este trabajo pude aprender mucho más sobre la integración continua y el uso de GitHub Actions. Entendí mejor la importancia de automatizar tareas como las pruebas y los despliegues, ya que esto permite ahorrar tiempo y evitar tener que realizar estos procesos manualmente cada vez que se hace una modificación en el proyecto. También pude mejorar mi manejo de los repositorios y, especialmente, de las ramas, que era un tema que anteriormente me costaba bastante. Además, aprendí a utilizar los Pull Request para revisar y organizar los cambios antes de incorporarlos a la rama principal, junto con los workflows para mantener un flujo de trabajo más ordenado.*
 
-### EA2
+### EP2
 > *en la segunda estapa de este trabajo logre mejorar mis habilidades en devops, debido a que pese ha ya saber de CI/CD en github action, esto hizo que se me aclara varias dudas que tuve, ademas de aprender a desarrollar entre mas personas para la disminucion de errores y crear features para evitar choques entre los trabajos de mis compañeros, las pull request me sirvio para ver que errores podriamos encontrar y evitar para no perjudicar a main (produccion) lo que me facilito bastante el trabajo.*
+
+### EP3
+
+> *en esta tercera etapa logré cerrar todo el ciclo DevOps llevando nuestra aplicación y su frontend a AWS, donde pude ver de forma real cómo funciona un sistema completo en producción. Aprendí mucho sobre la importancia de la observabilidad y el monitoreo usando herramientas como CloudWatch y ECS, ya que revisar logs y métricas reales me permitió entender qué pasaba exactamente cuando surgía un error en lugar de solo suponerlo. También me quedó mucho más claro el valor de las políticas de calidad y seguridad automática, como SonarQube, las reglas de protección de ramas y las validaciones en GitHub Actions, porque frenan cualquier falla crítica antes de que afecte a la rama principal y mantienen todo el proyecto mucho más estable y ordenado.*
 
 ## Declaración IA
 
