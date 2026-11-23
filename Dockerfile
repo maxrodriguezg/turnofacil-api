@@ -5,7 +5,7 @@ RUN mvn -B dependency:go-offline
 COPY src ./src
 RUN mvn -B package -DskipTests
 
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:27-alpine
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
